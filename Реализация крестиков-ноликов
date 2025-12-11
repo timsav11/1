@@ -1,1 +1,190 @@
-1234567890
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+class TicTacToe {
+private:
+    vector<vector<char>> board; // Игровое поле 3x3
+    char currentPlayer;         // Текущий игрок (X или O)
+    bool gameFinished;          // Флаг завершения игры
+
+public:
+    // Конструктор
+    TicTacToe() {
+        // Инициализация поля 3x3
+        board = vector<vector<char>>(3, vector<char>(3, ' '));
+        currentPlayer = 'X'; // X ходит первым
+        gameFinished = false;
+    }
+
+    // Отображение игрового поля
+    void displayBoard() {
+        cout << "\nТекущее поле:\n\n";
+        cout << "  0   1   2\n"; // Номера столбцов
+        for (int i = 0; i < 3; i++) {
+            cout << i << " "; // Номер строки
+            for (int j = 0; j < 3; j++) {
+                cout << board[i][j];
+                if (j < 2) cout << " | ";
+            }
+            cout << endl;
+            if (i < 2) {
+                cout << "  ---------\n";
+            }
+        }
+        cout << endl;
+    }
+
+    // Проверка корректности хода
+    bool isValidMove(int row, int col) {
+        // Проверка выхода за границы
+        if (row < 0 || row >= 3 || col < 0 || col >= 3) {
+            return false;
+        }
+        // Проверка, что клетка свободна
+        if (board[row][col] != ' ') {
+            return false;
+        }
+        return true;
+    }
+
+    // Выполнение хода
+    void makeMove(int row, int col) {
+        if (!isValidMove(row, col)) {
+            cout << "Некорректный ход! Попробуйте снова.\n";
+            return;
+        }
+
+        // Устанавливаем символ текущего игрока
+        board[row][col] = currentPlayer;
+
+        // Проверяем условия победы
+        if (checkWin()) {
+            displayBoard();
+            cout << "Игрок " << currentPlayer << " выиграл! Поздравляем!\n";
+            gameFinished = true;
+            return;
+        }
+
+        // Проверяем на ничью
+        if (checkDraw()) {
+            displayBoard();
+            cout << "Ничья! Игра завершена.\n";
+            gameFinished = true;
+            return;
+        }
+
+        // Меняем игрока
+        currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+    }
+
+    // Проверка победы
+    bool checkWin() {
+        // Проверка строк
+        for (int i = 0; i < 3; i++) {
+            if (board[i][0] != ' ' && 
+                board[i][0] == board[i][1] && 
+                board[i][1] == board[i][2]) {
+                return true;
+            }
+        }
+
+        // Проверка столбцов
+        for (int j = 0; j < 3; j++) {
+            if (board[0][j] != ' ' && 
+                board[0][j] == board[1][j] && 
+                board[1][j] == board[2][j]) {
+                return true;
+            }
+        }
+
+        // Проверка диагоналей
+        if (board[0][0] != ' ' && 
+            board[0][0] == board[1][1] && 
+            board[1][1] == board[2][2]) {
+            return true;
+        }
+
+        if (board[0][2] != ' ' && 
+            board[0][2] == board[1][1] && 
+            board[1][1] == board[2][0]) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // Проверка на ничью
+    bool checkDraw() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] == ' ') {
+                    return false; // Нашлась свободная клетка
+                }
+            }
+        }
+        return true; // Все клетки заполнены
+    }
+
+    // Основной игровой цикл
+    void playGame() {
+        cout << "Добро пожаловать в игру Крестики-Нолики!\n";
+        cout << "Игрок X ходит первым.\n";
+        cout << "Для хода введите номер строки и столбца (0, 1 или 2).\n";
+
+        while (!gameFinished) {
+            displayBoard();
+            cout << "Ход игрока " << currentPlayer << ":\n";
+
+            int row, col;
+            cout << "Введите строку (0-2): ";
+            cin >> row;
+            cout << "Введите столбец (0-2): ";
+            cin >> col;
+
+            // Проверка ввода
+            if (cin.fail()) {
+                cin.clear(); // Сброс флага ошибки
+                cin.ignore(10000, '\n'); // Очистка буфера
+                cout << "Ошибка ввода! Введите числа от 0 до 2.\n";
+                continue;
+            }
+
+            makeMove(row, col);
+        }
+    }
+
+    // Сброс игры для новой партии
+    void resetGame() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                board[i][j] = ' ';
+            }
+        }
+        currentPlayer = 'X';
+        gameFinished = false;
+    }
+};
+
+// Главная функция
+int main() {
+    char playAgain;
+    
+    do {
+        TicTacToe game;
+        game.playGame();
+        
+        cout << "\nХотите сыграть еще раз? (y/n): ";
+        cin >> playAgain;
+        
+        if (playAgain == 'y' || playAgain == 'Y') {
+            cout << "\nНачинаем новую игру!\n";
+        }
+        
+    } while (playAgain == 'y' || playAgain == 'Y');
+    
+    cout << "Спасибо за игру! До свидания!\n";
+    
+    return 0;
+}
